@@ -14,7 +14,7 @@ const JWT_SECRET = 'your-secret-key-change-in-production';
 
 
 app.use(cors({
-  origin: true,
+  origin: ["*"],
   credentials: true
 }));
 app.use(cookieParser());
