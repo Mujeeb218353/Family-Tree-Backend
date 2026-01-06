@@ -12,7 +12,10 @@ const PORT = 3000;
 const JWT_SECRET = 'your-secret-key-change-in-production';
 
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(cookieParser());
 app.use(bodyParser.json());
 
