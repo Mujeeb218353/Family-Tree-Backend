@@ -14,7 +14,7 @@ const JWT_SECRET = 'your-secret-key-change-in-production';
 
 
 app.use(cors({
-  origin: ["*"],
+  origin: ["https://family-tree-frontend-nine.vercel.app"],
   credentials: true
 }));
 app.use(cookieParser());
