@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = 3000;
@@ -20,34 +21,43 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 
-const db = new sqlite3.Database('./family_tree.db', (err) => {
-  if (err) console.error('Database connection error:', err);
-  else console.log('Connected to SQLite database');
+const db = new Pool({
+  connectionString: 'postgresql://neondb_owner:npg_Xq98spwNuyhE@ep-winter-dream-a4aks9xw-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
+db.connect()
+  .then(() => console.log("Connected to PostgreSQL (Neon)"))
+  .catch((err) => console.error("Database connection error:", err));
 
-db.serialize(() => {
-  
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
 
-  db.run(`CREATE TABLE IF NOT EXISTS family_members (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
-    relation_type TEXT NOT NULL,
-    date_of_birth DATE,
-    notes TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    CHECK (relation_type IN ('grand-parent', 'parent', 'child', 'sibling', 'grand-child', 'spouse', 'other'))
-  )`);
-});
+(async () => {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS family_members (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      relation_type TEXT NOT NULL,
+      date_of_birth DATE,
+      notes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      CHECK (relation_type IN ('grand-parent','parent','child','sibling','grand-child','spouse','other'))
+    )
+  `);
+})();
+
 
 const cookieOptions = {
   httpOnly: true,
