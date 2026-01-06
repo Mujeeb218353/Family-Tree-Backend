@@ -17,6 +17,7 @@ app.use(cors({
   origin: ["https://family-tree-frontend-nine.vercel.app"],
   credentials: true
 }));
+
 app.use(cookieParser());
 app.use(bodyParser.json());
 
@@ -104,7 +105,6 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Login
 app.post('/api/auth/login', (req, res) => {
   const { email, password } = req.body;
 
@@ -146,7 +146,6 @@ app.get('/api/family-members/relation/:type', authenticateToken, (req, res) => {
   );
 });
 
-// Add family member
 app.post('/api/family-members', authenticateToken, (req, res) => {
   const { name, relation_type, date_of_birth, notes } = req.body;
 
@@ -169,7 +168,6 @@ app.post('/api/family-members', authenticateToken, (req, res) => {
   );
 });
 
-// Update family member
 app.put('/api/family-members/:id', authenticateToken, (req, res) => {
   const { name, relation_type, date_of_birth, notes } = req.body;
   const { id } = req.params;
@@ -185,7 +183,6 @@ app.put('/api/family-members/:id', authenticateToken, (req, res) => {
   );
 });
 
-// Delete family member
 app.delete('/api/family-members/:id', authenticateToken, (req, res) => {
   db.run(
     'DELETE FROM family_members WHERE id = ? AND user_id = ?',
@@ -197,8 +194,6 @@ app.delete('/api/family-members/:id', authenticateToken, (req, res) => {
     }
   );
 });
-
-// ==================== SERVER START ====================
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
